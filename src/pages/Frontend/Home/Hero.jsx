@@ -4,6 +4,7 @@ import { useRef } from "react"
 
 const Hero = () => {
   const soundRef = useRef(null)
+  const user = JSON.parse(localStorage.getItem('user'))
 
   const playSound = () => {
     if (soundRef.current) {
@@ -13,11 +14,13 @@ const Hero = () => {
   return (
     <main>
       <div className="container">
-        <h1 className='text-center'>Welcome to Our Website</h1>
-        <p className='text-center'>We are glad to have you here. Explore our content and enjoy your stay!</p>
+        <h1 className='text-center mt-5'>Welcome to <span className="text-danger">'{user?.fullName || 'Our Website'}'</span></h1>
+        <h1 className="text-center">{user?.email}</h1>
+        <p className='text-center'>We are glad to have you here. Explore our content and enjoy your stay!👇</p>
         <Button type="primary" size="large" className="d-block mx-auto" onClick={playSound}>
           Get Started
         </Button>
+
         <audio ref={soundRef} src={sound} />
       </div>
     </main>

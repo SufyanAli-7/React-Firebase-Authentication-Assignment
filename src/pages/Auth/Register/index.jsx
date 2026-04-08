@@ -1,6 +1,6 @@
 import { Button, Form, Input, Typography } from 'antd'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 const { Title, Paragraph } = Typography
 const { Item } = Form
@@ -11,6 +11,7 @@ const Register = () => {
 
   const [state, setState] = useState(initialState)
   const [isProcessing, setIsProcessing] = useState(false)
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
     setState({ ...state, [e.target.name]: e.target.value })
@@ -52,13 +53,14 @@ const Register = () => {
     setTimeout(() => {
       setIsProcessing(false)
       window.toastify('Registration successful', 'success')
+      navigate('/auth/login')
     }, 2000)
   }
 
   return (
     <main className='auth'>
       <div className="container">
-        <div className="card p-4 mx-auto">
+        <div className="card p-4 mx-auto shadow">
               <Title level={1} className='text-center'>Register</Title>
               <Paragraph className='text-center'>Already have an account? <Link className='text-decoration-none' to="/auth/login">Login</Link></Paragraph>
               <Form layout='vertical'>
@@ -74,7 +76,7 @@ const Register = () => {
                   <Item label="Confirm Password" required>
                       <Input.Password type="password" size='large' placeholder='Confirm your password' name='confirmPassword' onChange={handleChange} />
                   </Item>
-                  <Button type='primary' size='large' block loading={isProcessing} onClick={handleRegister}>
+                  <Button type='primary' size='large' htmlType='submit' block loading={isProcessing} onClick={handleRegister}>
                       Register
                   </Button>
               </Form>
