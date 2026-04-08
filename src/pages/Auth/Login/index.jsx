@@ -53,7 +53,8 @@ const Login = () => {
     <main className='auth'>
       <div className="container">
         <div className="card p-4 mx-auto shadow">
-              <Title level={1} className='text-center mb-4'>Login</Title>
+              <Title level={1} className='text-center'>Login</Title>
+              <Paragraph className='text-center'>Don't have an account? <Link className='text-decoration-none' to="/auth/register">Register</Link></Paragraph>
               <Form layout='vertical'>
                   <Item label="Email" required>
                       <Input type="email" size='large' placeholder='Enter your email' name='email' onChange={handleChange} />
@@ -61,7 +62,7 @@ const Login = () => {
                   <Item label="Password" required>
                       <Input.Password type="password" size='large' placeholder='Enter your password' name='password' onChange={handleChange} />
                   </Item>
-                  <Paragraph>Don't have an account? <Link className='text-decoration-none' to="/auth/register">Register</Link></Paragraph>
+                  <Paragraph>Forgot Password? <Link className='text-decoration-none' to="/auth/forgot-password">Reset Password</Link></Paragraph>
                   <Button type='primary' size='large' htmlType='submit' block loading={isProcessing} onClick={handleLogin}>
                       Login
                   </Button>
