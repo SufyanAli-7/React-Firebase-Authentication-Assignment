@@ -18,7 +18,7 @@ const Hero = () => {
         <h1 className="text-center">{user?.email}</h1>
         <p className='text-center'>We are glad to have you here. Explore our content and enjoy your stay!👇</p>
         <Button type="primary" size="large" className="d-block mx-auto" onClick={playSound}>
-          Get Started
+          Get Source Code
         </Button>
 
         <audio ref={soundRef} src={sound} />
