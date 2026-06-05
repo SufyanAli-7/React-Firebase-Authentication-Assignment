@@ -1,7 +1,8 @@
-import { useAuth } from '@/context/Auth'
+import { auth } from '@/config/firebase'
 import { Button, Form, Input, Typography } from 'antd'
+import { sendPasswordResetEmail } from 'firebase/auth'
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 const { Title, Paragraph } = Typography
 const { Item } = Form
@@ -10,11 +11,9 @@ const initialState = { email: '' }
 
 const ForgotPassword = () => {
 
-  const { dispatch } = useAuth()
-
   const [state, setState] = useState(initialState)
   const [isProcessing, setIsProcessing] = useState(false)
-  const navigate = useNavigate()
+
 
   const handleChange = (e) => {
     setState({ ...state, [e.target.name]: e.target.value })
@@ -27,22 +26,24 @@ const ForgotPassword = () => {
       window.toastify('Please enter your email', 'error')
       return
     }
-    const users = JSON.parse(localStorage.getItem('users') || '[]')    
-    setIsProcessing(true)
-    let user = users.find(u => u.email === email)
-    if (!user) {
-      setIsProcessing(false)
-      window.toastify('Email not found', 'error')
-      return
-    }
 
-    setTimeout(() => {
-      localStorage.setItem('user', JSON.stringify(user))
-      dispatch({ isAuth: true, user: user })
-      setIsProcessing(false)
-      window.toastify('Password recovery successful', 'success')
-      navigate('/')
-    }, 2000)
+    setIsProcessing(true)
+
+    sendPasswordResetEmail(auth, email, { url: import.meta.env.VITE_CONTINUE_URL })
+      .then(() => {
+        window.toastify('Password reset email sent successfully', 'success')
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        if (errorCode === 'auth/user-not-found') {
+          window.toastify('User not found', 'error')
+        } else {
+          console.log(error)
+          window.toastify('Something went wrong', 'error')
+        }
+      }).finally(() => {
+        setIsProcessing(false)
+      })
   }
 
   return (
@@ -56,7 +57,7 @@ const ForgotPassword = () => {
                   </Item>
                   <Paragraph>Remember Password? <Link className='text-decoration-none' to="/auth/login">Login</Link></Paragraph>
                   <Button type='primary' size='large' htmlType='submit' block loading={isProcessing} onClick={handleForgotPassword}>
-                      Forgot Password
+                      Sent Email
                   </Button>
               </Form>
         </div>

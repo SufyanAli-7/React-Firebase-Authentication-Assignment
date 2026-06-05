@@ -1,6 +1,8 @@
+import { auth } from '@/config/firebase'
 import { Button, Form, Input, Typography } from 'antd'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 const { Title, Paragraph } = Typography
 const { Item } = Form
@@ -11,7 +13,6 @@ const Register = () => {
 
   const [state, setState] = useState(initialState)
   const [isProcessing, setIsProcessing] = useState(false)
-  const navigate = useNavigate()
 
   const handleChange = (e) => {
     setState({ ...state, [e.target.name]: e.target.value })
@@ -37,24 +38,26 @@ const Register = () => {
       window.toastify('Passwords do not match', 'error')
       return
     }
-          
-    const user = { uid: window.getRandomId(), fullName, email ,password, createdAt: new Date().getTime(), status: 'active', role: 'user' }
-    const users = JSON.parse(localStorage.getItem('users') || '[]')    
-    setIsProcessing(true)
-    let userExists = users.some(u => u.email === email)
-    if (userExists) {
-      setIsProcessing(false)
-      window.toastify('User is already exists', 'error')
-      return
-    }
-    users.push(user)
-    localStorage.setItem('users', JSON.stringify(users))
 
-    setTimeout(() => {
-      setIsProcessing(false)
-      window.toastify('Registration successful', 'success')
-      navigate('/auth/login')
-    }, 2000)
+    setIsProcessing(true)
+     
+    createUserWithEmailAndPassword(auth, email, password)
+  .then(() => {
+     window.toastify('User registered successfully', 'success')     
+  })
+  .catch((error) => {    
+    const errorCode = error.code;
+    if (errorCode === 'auth/email-already-in-use') {
+      window.toastify('Email already in use', 'error')
+    }     
+    else {
+      window.toastify('Something went wrong', 'error')
+    }
+
+  }).finally(() => {
+    setIsProcessing(false)
+  }); 
+    
   }
 
   return (

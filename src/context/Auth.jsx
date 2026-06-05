@@ -1,37 +1,60 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { auth } from '@/config/firebase'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { createContext, useContext, useEffect, useReducer, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const Auth = createContext()
 
 const initialState = { isAuth: false, user: {} }
 
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'SET_LOGIN':
+      return { ...state, isAuth: true, user: action.payload }
+    case 'SET_PROFILE':
+      return { ...state, isAuth: true, user: action.payload }
+    case 'SET_LOGOUT':
+      return initialState
+    default:
+      return state
+  }
+}
+
 const AuthContext = ({ children }) => {
 
-    const [state, setState] = useState(initialState)
-    const [isAppLoading, setIsAppLoading] = useState(true)
+  const [state, dispatch] = useReducer(reducer, initialState)
+  const navigate = useNavigate()
+  const [isAppLoading, setIsAppLoading] = useState(true)
 
-    const readProfile = () => {
-        // const user = { uid: '123', name: 'John Doe', email: 'john.doe@example.com' }
-        const user = JSON.parse(localStorage.getItem('user'))
-        if (user) {
-            setState({ isAuth: true, user })
-        }
-        // setState({ isAuth: true, user })
-        setTimeout(() => {
-            setIsAppLoading(false)
-        }, 2000)
-    }
+  const readProfile = () => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const { uid, email } = user
+        dispatch({ type: 'SET_LOGIN', payload: { uid, email } })        
+      }
+      setIsAppLoading(false)
+    })
+  }
 
-    useEffect(() => {
-        readProfile()
-    }, [])
+  useEffect(() => {
+    readProfile()
+  }, [])
 
-    const handleLogout = () => {
-        localStorage.removeItem('user')
-        setState(initialState)
-    }
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => {
+        dispatch({ type: 'SET_LOGOUT' })
+        window.toastify('Logout successful', 'success')
+        navigate('auth/login')
+      })
+      .catch((error) => {
+        console.error(error)
+        window.toastify('Logout failed. Please try again.', 'error')
+      })
+  }
 
   return (
-    <Auth.Provider value={{...state, isAppLoading, handleLogout , dispatch : setState}}>
+    <Auth.Provider value={{ ...state, isAppLoading, handleLogout, dispatch }}>
       {children}
     </Auth.Provider>
   )
